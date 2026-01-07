@@ -1,0 +1,59 @@
+@model LickedIn.Models.SkillType
+
+@{
+    ViewData["Title"] = "Usuń Umiejętność";
+    bool hasError = ViewBag.DeleteError != null;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-danger shadow">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">Czy na pewno usunąć?</h3>
+                </div>
+                
+                <div class="card-body">
+                    
+                    @if (hasError)
+                    {
+                        // SCENARIUSZ 1: Blokada usunięcia
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"></i>
+                            <div>
+                                <strong>Operacja zablokowana:</strong> @ViewBag.DeleteError
+                            </div>
+                        </div>
+                        
+                        <dl class="row">
+                            <dt class="col-sm-4">Nazwa umiejętności:</dt>
+                            <dd class="col-sm-8 fw-bold">@Model.Name</dd>
+                        </dl>
+
+                        <div class="mt-4 text-center">
+                            <a asp-action="Index" class="btn btn-secondary btn-lg">Powrót do listy</a>
+                        </div>
+                    }
+                    else
+                    {
+                        // SCENARIUSZ 2: Można usuwać
+                        <h5 class="card-title text-danger mb-4">Tej operacji nie można cofnąć.</h5>
+                        
+                        <dl class="row mb-4">
+                            <dt class="col-sm-4">Nazwa umiejętności:</dt>
+                            <dd class="col-sm-8 fs-5">@Model.Name</dd>
+                        </dl>
+
+                        <form asp-action="Delete">
+                            <input type="hidden" asp-for="Id" />
+                            <div class="d-flex justify-content-between">
+                                <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
+                                <input type="submit" value="Potwierdź usunięcie" class="btn btn-danger" />
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

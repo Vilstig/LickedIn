@@ -1,0 +1,63 @@
+@model IEnumerable<LickedIn.Models.Employee>
+
+@{
+    ViewData["Title"] = "Pracownicy";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Baza Pracowników</h1>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-person-plus-fill"></i> Dodaj pracownika
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Imię i Nazwisko</th>
+                        <th>Email</th>
+                        <th>Telefon</th>
+                        <th>PESEL</th>
+                        <th class="text-end">Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-bold">@item.FirstName @item.LastName</div>
+                            </td>
+                            <td>@item.Email</td>
+                            <td>@item.PhoneNumber</td>
+                            <td>@item.Pesel</td>
+                            <td class="text-end">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-info btn-sm text-white me-1" title="Zarządzaj kompetencjami">
+                                    Szczegóły
+                                </a>
+                                
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-warning btn-sm me-1">
+                                    Edytuj
+                                </a>
+                                
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm">
+                                    Usuń
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info text-center mt-3">
+                    Brak pracowników w bazie.
+                </div>
+            }
+        </div>
+    </div>
+</div>

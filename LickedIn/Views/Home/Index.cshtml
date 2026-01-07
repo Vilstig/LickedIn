@@ -1,0 +1,46 @@
+﻿@{
+    ViewData["Title"] = "Panel Główny";
+}
+
+<div class="text-center mb-5">
+    <h1 class="display-4 fw-bold">Witaj w LickedIn</h1>
+    <p class="lead text-muted">System zarządzania kompetencjami pracowników.</p>
+</div>
+
+<div class="row justify-content-center">
+    
+    <div class="col-md-5 mb-4">
+        <div class="card h-100 shadow-sm border-0 hover-shadow">
+            <div class="card-body text-center p-5">
+                <div class="display-1 text-primary mb-3">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <h3 class="card-title">Baza Pracowników</h3>
+                <p class="card-text text-muted">
+                    Dodawaj nowych pracowników, edytuj ich dane osobowe oraz zarządzaj ich przypisanymi kompetencjami.
+                </p>
+                <a asp-controller="Employee" asp-action="Index" class="btn btn-primary btn-lg mt-3">
+                    Zarządzaj Pracownikami
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5 mb-4">
+        <div class="card h-100 shadow-sm border-0 hover-shadow">
+            <div class="card-body text-center p-5">
+                <div class="display-1 text-success mb-3">
+                    <i class="bi bi-collection-fill"></i>
+                </div>
+                <h3 class="card-title">Umiejętności</h3>
+                <p class="card-text text-muted">
+                    Definiuj rodzaje umiejętności dostępne w systemie (np. Języki, Technologie, Certyfikaty).
+                </p>
+                <a asp-controller="SkillType" asp-action="Index" class="btn btn-outline-success btn-lg mt-3">
+                    Edytuj Umiejętności
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>

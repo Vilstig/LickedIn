@@ -1,0 +1,39 @@
+@model LickedIn.Models.Competency
+
+@{
+    ViewData["Title"] = "Usuń kompetencję";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger shadow">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Usuwanie kompetencji</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title text-danger mb-4">Czy na pewno chcesz odebrać tę umiejętność pracownikowi?</h5>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Pracownik:</dt>
+                        <dd class="col-sm-8 fw-bold">@Model.Employee?.FirstName @Model.Employee?.LastName</dd>
+
+                        <dt class="col-sm-4">Umiejętność:</dt>
+                        <dd class="col-sm-8 fw-bold">@Model.SkillType?.Name</dd>
+
+                        <dt class="col-sm-4">Aktualny poziom:</dt>
+                        <dd class="col-sm-8">@Model.Level</dd>
+                    </dl>
+
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-controller="Employee" asp-action="Index" class="btn btn-secondary">Anuluj</a>
+                            <input type="submit" value="Potwierdź usunięcie" class="btn btn-danger" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

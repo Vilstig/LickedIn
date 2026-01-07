@@ -1,0 +1,8 @@
+użyj tych komend
+dotnet restore
+dotnet ef database update
+dotnet run
+
+możliwe że trzeba będzie zainstalować
+.net sdk 9.0
+narzędzie ef (dotnet tool install --global dotnet-ef)

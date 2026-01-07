@@ -1,0 +1,55 @@
+@model LickedIn.Models.Competency
+
+@{
+    ViewData["Title"] = "Przypisz kompetencję";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Przypisz nową umiejętność</h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Pracownik: <strong>@ViewBag.EmployeeName</strong></p>
+                    <hr />
+
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <input type="hidden" asp-for="EmployeeId" />
+
+                        <div class="form-group mb-3">
+                            <label asp-for="SkillTypeId" class="control-label fw-bold mb-1">Wybierz umiejętność</label>
+                            <select asp-for="SkillTypeId" class="form-control" asp-items="ViewBag.SkillTypeId">
+                                <option value="" selected disabled>-- Wybierz z listy --</option>
+                            </select>
+                            <span asp-validation-for="SkillTypeId" class="text-danger"></span>
+                            
+                            <div class="form-text mt-1">
+                                Nie ma na liście? 
+                                <a asp-controller="SkillType" asp-action="Create" target="_blank">Dodaj nową definicję</a>.
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="Level" class="control-label fw-bold mb-1">Poziom (1-10)</label>
+                            <input asp-for="Level" class="form-control" type="number" min="1" max="10" placeholder="Wpisz poziom zaawansowania" />
+                            <span asp-validation-for="Level" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <input type="submit" value="Przypisz" class="btn btn-success" />
+                            <a asp-controller="Employee" asp-action="Index" class="btn btn-secondary">Anuluj</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
