@@ -5,4 +5,4 @@ dotnet run
 
 możliwe że trzeba będzie zainstalować
 .net sdk 9.0
-narzędzie ef (dotnet tool install --global dotnet-ef)
+narzędzie ef (dotnet tool install --global dotnet-ef --version 9.* )
