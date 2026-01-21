@@ -2,9 +2,11 @@ using LickedIn.Models;
 using LickedIn.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LickedIn.Controllers
 {
+    [Authorize(Policy = "HR")]
     public class EmployeeController : Controller
     {
         private readonly ApplicationDbContext _context;

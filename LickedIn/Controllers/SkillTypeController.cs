@@ -1,11 +1,14 @@
 using System.ComponentModel;
 using LickedIn.Data;
 using LickedIn.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+
 namespace LickedIn.Controllers
 {
+    [Authorize(Policy = "HR")]
     public class SkillTypeController : Controller
     {
         private readonly ApplicationDbContext _context;

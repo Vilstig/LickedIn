@@ -1,9 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using LickedIn.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace LickedIn.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

@@ -3,9 +3,11 @@ using LickedIn.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LickedIn.Controllers
 {
+    [Authorize(Policy = "HR")]
     public class CompetencyController : Controller
     {
         private readonly ApplicationDbContext _context;
