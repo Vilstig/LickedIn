@@ -1,0 +1,218 @@
+@model LickedIn.Models.ViewModels.ProjectEditViewModel
+
+@{
+    ViewData["Title"] = "Edytuj Projekt";
+    var skills = (List<LickedIn.Models.SkillType>)ViewData["Skills"];
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0">Edycja Projektu: @Model.Name</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="Edit" id="editForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3 font-weight-bold"></div>
+                <input type="hidden" asp-for="Id" />
+
+                <h5 class="text-secondary border-bottom pb-2">1. Dane podstawowe</h5>
+                <div class="row mt-3">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Name" class="form-label fw-bold">Nazwa Projektu</label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ManagerId" class="form-label fw-bold">Kierownik</label>
+                        <select asp-for="ManagerId" class="form-control" asp-items="ViewBag.ManagerId"></select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="StartDate" class="form-label fw-bold">Data Startu</label>
+                        <input asp-for="StartDate" type="date" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="EndDate" class="form-label fw-bold">Data Końca</label>
+                        <input asp-for="EndDate" type="date" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4 border-bottom pb-2">
+                    <h5 class="text-secondary mb-0">2. Wakaty i Zespół</h5>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="addMemberCard()">
+                        <i class="bi bi-plus-lg"></i> Dodaj nowy wakat
+                    </button>
+                </div>
+
+                <div id="membersContainer" class="mt-3">
+                    @for (int i = 0; i < Model.TeamMembers.Count; i++)
+                    {
+                        var member = Model.TeamMembers[i];
+                        bool isFilled = member.EmployeeId != null;
+
+                        <div class="card mb-3 border-secondary member-card" data-index="@i">
+                            <input type="hidden" name="TeamMembers[@i].Id" value="@member.Id" />
+                            <input type="hidden" name="TeamMembers[@i].EmployeeId" value="@member.EmployeeId" />
+                            
+                            <div class="card-header @(isFilled ? "bg-success text-white" : "bg-light") d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="fw-bold">Wakat #@(i + 1)</span>
+                                    @if (isFilled)
+                                    {
+                                        <span class="ms-2 badge bg-white text-success">
+                                            <i class="bi bi-person-check-fill"></i> @member.EmployeeName
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="ms-2 badge bg-warning text-dark">Wolny</span>
+                                    }
+                                </div>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="removeMember(this)">
+                                    <i class="bi bi-trash"></i> Usuń
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <h6 class="text-muted border-bottom pb-1">Wymagane umiejętności:</h6>
+                                <table class="table table-sm table-borderless">
+                                    <tbody id="skillsList_@i">
+                                        @for (int j = 0; j < member.RequiredSkills.Count; j++)
+                                        {
+                                            <tr>
+                                                <td width="60%">
+                                                    <select name="TeamMembers[@i].RequiredSkills[@j].SkillTypeId" class="form-select form-select-sm" asp-items="@(new SelectList(skills, "Id", "Name", member.RequiredSkills[j].SkillTypeId))">
+                                                    </select>
+                                                </td>
+                                                <td width="30%">
+                                                    <input type="number" name="TeamMembers[@i].RequiredSkills[@j].Level" class="form-control form-control-sm" value="@member.RequiredSkills[j].Level" min="1" max="10" />
+                                                </td>
+                                                <td width="10%" class="text-end">
+                                                    <button type="button" class="btn btn-outline-danger btn-sm border-0" onclick="this.closest('tr').remove()">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addSkillRow(@i)">
+                                    <i class="bi bi-plus"></i> Dodaj umiejętność
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <hr class="mt-5" />
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-secondary">Anuluj</a>
+                    <button type="submit" class="btn btn-warning btn-lg">
+                        <i class="bi bi-save"></i> Zapisz zmiany
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        const availableSkills = @Json.Serialize(skills.Select(s => new { value = s.Id, text = s.Name }));
+        // Ustawiamy indeks na podstawie liczby istniejących elementów, żeby nie nadpisać danych
+        let memberIndex = @Model.TeamMembers.Count;
+
+        function addMemberCard() {
+            const container = document.getElementById('membersContainer');
+            const card = document.createElement('div');
+            card.className = 'card mb-3 border-secondary member-card';
+            card.setAttribute('data-index', memberIndex);
+
+            card.innerHTML = `
+                <input type="hidden" name="TeamMembers[${memberIndex}].Id" value="0" />
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="fw-bold">Nowy Wakat</span>
+                        <span class="ms-2 badge bg-primary">Nowy</span>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeMember(this)">
+                        <i class="bi bi-trash"></i> Usuń
+                    </button>
+                </div>
+                <div class="card-body">
+                    <h6 class="text-muted border-bottom pb-1">Wymagane umiejętności:</h6>
+                    <table class="table table-sm table-borderless">
+                        <tbody id="skillsList_${memberIndex}"></tbody>
+                    </table>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="addSkillRow(${memberIndex})">
+                        <i class="bi bi-plus"></i> Dodaj umiejętność
+                    </button>
+                </div>
+            `;
+
+            container.appendChild(card);
+            addSkillRow(memberIndex);
+            memberIndex++;
+        }
+
+        function addSkillRow(mIdx) {
+            const tbody = document.getElementById(`skillsList_${mIdx}`);
+            const sIdx = tbody.children.length;
+            
+            let options = '<option value="" disabled selected>-- Wybierz --</option>';
+            availableSkills.forEach(s => options += `<option value="${s.value}">${s.text}</option>`);
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td width="60%">
+                    <select name="TeamMembers[${mIdx}].RequiredSkills[${sIdx}].SkillTypeId" class="form-select form-select-sm" required>${options}</select>
+                </td>
+                <td width="30%">
+                    <input type="number" name="TeamMembers[${mIdx}].RequiredSkills[${sIdx}].Level" class="form-control form-control-sm" value="1" min="1" max="10" required />
+                </td>
+                <td width="10%" class="text-end">
+                    <button type="button" class="btn btn-outline-danger btn-sm border-0" onclick="this.closest('tr').remove()"><i class="bi bi-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function removeMember(btn) {
+            const card = btn.closest('.member-card');
+            card.remove();
+            reindexMembers();
+        }
+
+        // Ważne: przy usuwaniu ze środka listy trzeba przenumerować indeksy,
+        // inaczej MVC Model Binder zgubi elementy po "dziurze".
+        function reindexMembers() {
+            const cards = document.querySelectorAll('.member-card');
+            cards.forEach((card, mIdx) => {
+                // Aktualizuj ukryte pola ID
+                const idInput = card.querySelector('input[name*="].Id"]');
+                if(idInput) idInput.name = `TeamMembers[${mIdx}].Id`;
+                
+                const empIdInput = card.querySelector('input[name*="].EmployeeId"]');
+                if(empIdInput) empIdInput.name = `TeamMembers[${mIdx}].EmployeeId`;
+
+                // Aktualizuj listę skilli
+                const tbody = card.querySelector('tbody');
+                tbody.id = `skillsList_${mIdx}`;
+                
+                const addBtn = card.querySelector('button[onclick*="addSkillRow"]');
+                addBtn.setAttribute('onclick', `addSkillRow(${mIdx})`);
+
+                const skillRows = tbody.querySelectorAll('tr');
+                skillRows.forEach((row, sIdx) => {
+                    const sel = row.querySelector('select');
+                    const inp = row.querySelector('input[type="number"]');
+                    if(sel) sel.name = `TeamMembers[${mIdx}].RequiredSkills[${sIdx}].SkillTypeId`;
+                    if(inp) inp.name = `TeamMembers[${mIdx}].RequiredSkills[${sIdx}].Level`;
+                });
+            });
+            memberIndex = cards.length;
+        }
+    </script>
+}

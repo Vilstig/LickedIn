@@ -1,0 +1,57 @@
+@model LickedIn.Models.Project
+
+@{
+    ViewData["Title"] = "Usuń Projekt";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger shadow">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">Usuwanie Projektu</h3>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title text-danger text-center mb-4">
+                        Czy na pewno chcesz usunąć ten projekt?<br/>
+                        <small class="text-muted fs-6">Zostanie on również usunięty z historii pracowników.</small>
+                    </h5>
+                    
+                    <div class="alert alert-light border text-center">
+                        <h2 class="display-6">@Model.Name</h2>
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-4 text-end">Kierownik:</dt>
+                        <dd class="col-sm-8 fw-bold">
+                            @if(Model.Manager != null)
+                            {
+                                @($"{Model.Manager.FirstName} {Model.Manager.LastName}")
+                            }
+                            else
+                            {
+                                <span class="text-muted">Brak danych</span>
+                            }
+                        </dd>
+
+                        <dt class="col-sm-4 text-end">Data startu:</dt>
+                        <dd class="col-sm-8">@Model.StartDate.ToShortDateString()</dd>
+
+                        <dt class="col-sm-4 text-end">Data końca:</dt>
+                        <dd class="col-sm-8">
+                            @(Model.EndDate.HasValue ? Model.EndDate.Value.ToShortDateString() : "W toku")
+                        </dd>
+                    </dl>
+
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-action="Index" class="btn btn-secondary btn-lg">Nie, wróć</a>
+                            <input type="submit" value="Tak, usuń projekt" class="btn btn-danger btn-lg" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
