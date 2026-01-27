@@ -1,45 +1,91 @@
 @model IEnumerable<LickedIn.Models.Project>
 
 @{
-    ViewData["Title"] = "Projekty";
+    ViewData["Title"] = "Lista Projektów";
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>Lista Projektów</h1>
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="bi bi-folder-plus"></i> Rozpocznij nowy projekt
+        <h1>
+            <i class="bi bi-briefcase text-warning"></i> Projekty
+        </h1>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Utwórz nowy projekt
         </a>
     </div>
 
-    <table class="table table-hover shadow-sm">
-        <thead class="table-light">
-            <tr>
-                <th>Nazwa</th>
-                <th>Kierownik</th>
-                <th>Data Startu</th>
-                <th>Data Końca</th>
-                <th>Zespół (osoby)</th>
-                <th>Akcje</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover table-striped align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Nazwa Projektu</th>
+                        <th>Kierownik</th>
+                        <th>Okres trwania</th>
+                        <th class="text-center">Rozmiar zespołu</th>
+                        <th class="text-end pe-4">Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <span class="fw-bold text-primary">@item.Name</span>
+                            </td>
+                            <td>
+                                @if (item.Manager != null)
+                                {
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-person-badge me-2 text-muted"></i>
+                                        <span>@item.Manager.FirstName @item.Manager.LastName</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted fst-italic">Brak kierownika</span>
+                                }
+                            </td>
+                            <td>
+                                <small class="d-block text-muted">Start: @item.StartDate.ToShortDateString()</small>
+                                @if (item.EndDate.HasValue)
+                                {
+                                    <small class="d-block text-muted">Koniec: @item.EndDate.Value.ToShortDateString()</small>
+                                }
+                                else
+                                {
+                                    <small class="d-block text-success fw-bold">W toku</small>
+                                }
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-secondary rounded-pill" title="Liczba pracowników">
+                                    @item.ProjectMembers.Count
+                                </span>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info text-white me-1" title="Zobacz skład zespołu">
+                                    <i class="bi bi-people-fill"></i> Zespół
+                                </a>
+
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning me-1" title="Edytuj">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger" title="Usuń">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (!Model.Any())
             {
-                <tr>
-                    <td class="fw-bold">@item.Name</td>
-                    <td>@(item.Manager?.FirstName + " " + item.Manager?.LastName)</td>
-                    <td>@item.StartDate.ToShortDateString()</td>
-                    <td>@(item.EndDate.HasValue ? item.EndDate.Value.ToShortDateString() : "-")</td>
-                    <td>
-                        <span class="badge bg-secondary">@item.ProjectMembers.Count</span>
-                    </td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning">Edytuj</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">Usuń</a>
-                    </td>
-                </tr>
+                <div class="p-5 text-center text-muted">
+                    <i class="bi bi-folder-x display-4 mb-3 d-block"></i>
+                    <p>Brak projektów w bazie. Utwórz pierwszy projekt!</p>
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+    </div>
 </div>

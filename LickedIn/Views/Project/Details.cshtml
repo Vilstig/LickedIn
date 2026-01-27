@@ -1,0 +1,141 @@
+@model LickedIn.Models.Project
+
+@{
+    ViewData["Title"] = "Szczegóły Projektu";
+    // Sprawdzamy, czy są jakieś nieobsadzone wakaty
+    bool hasVacancies = Model.ProjectMembers.Any(m => m.EmployeeId == null);
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>@Model.Name</h1>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edytuj</a>
+            <a asp-action="Index" class="btn btn-outline-secondary">Wróć do listy</a>
+        </div>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-light fw-bold">Informacje o projekcie</div>
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Kierownik:</dt>
+                <dd class="col-sm-9">
+                    <a asp-controller="Employee" asp-action="Details" asp-route-id="@Model.ManagerId" class="text-decoration-none">
+                        @Model.Manager?.FirstName @Model.Manager?.LastName
+                    </a>
+                </dd>
+                <dt class="col-sm-3">Data rozpoczęcia:</dt>
+                <dd class="col-sm-9">@Model.StartDate.ToShortDateString()</dd>
+                <dt class="col-sm-3">Stan zespołu:</dt>
+                <dd class="col-sm-9">
+                    @if(hasVacancies)
+                    {
+                        <span class="text-danger fw-bold">Wymaga uzupełnienia (@Model.ProjectMembers.Count(m => m.EmployeeId == null) wakatów)</span>
+                    }
+                    else
+                    {
+                        <span class="text-success fw-bold">Pełny skład</span>
+                    }
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-person-lines-fill"></i> Skład Zespołu</h5>
+            
+            @if (hasVacancies)
+            {
+                <form asp-action="FillVacancies" method="post" class="d-inline">
+                    <input type="hidden" name="projectId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-light btn-sm text-success fw-bold">
+                        <i class="bi bi-magic"></i> Automatycznie uzupełnij braki
+                    </button>
+                </form>
+            }
+        </div>
+        
+        <div class="card-body p-0">
+            @if (Model.ProjectMembers != null && Model.ProjectMembers.Any())
+            {
+                <table class="table table-striped table-hover mb-0 align-middle">
+                    <thead>
+                        <tr>
+                            <th>Pracownik / Status</th>
+                            <th>Wymagania stanowiska</th>
+                            <th class="text-end">Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var member in Model.ProjectMembers)
+                        {
+                            bool isVacant = member.EmployeeId == null;
+                            <tr class="@(isVacant ? "table-warning" : "")">
+                                <td>
+                                    @if (!isVacant)
+                                    {
+                                        <div class="fw-bold">
+                                            @member.Employee?.FirstName @member.Employee?.LastName
+                                        </div>
+                                        <small class="text-muted">@member.Employee?.Email</small>
+                                    }
+                                    else
+                                    {
+                                        <div class="text-danger fw-bold">
+                                            <i class="bi bi-exclamation-circle"></i> WAKAT (Nieobsadzone)
+                                        </div>
+                                        <small class="text-muted">Oczekiwanie na pracownika</small>
+                                    }
+                                </td>
+                                <td>
+                                    @if(member.RequiredSkills != null && member.RequiredSkills.Any())
+                                    {
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @foreach(var skill in member.RequiredSkills)
+                                            {
+                                                <span class="badge bg-secondary border text-light">
+                                                    @skill.SkillType?.Name: @skill.Level
+                                                </span>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Brak specyficznych wymagań</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    @if (!isVacant)
+                                    {
+                                        <div class="btn-group">
+                                            <a asp-controller="Employee" asp-action="Details" asp-route-id="@member.EmployeeId" class="btn btn-sm btn-info text-white" title="Profil">
+                                                <i class="bi bi-person"></i>
+                                            </a>
+                                            <form asp-action="RemoveMember" asp-route-id="@member.Id" method="post" class="d-inline" onsubmit="return confirm('Czy na pewno chcesz usunąć tego pracownika z projektu? Wakat stanie się wolny.');">
+                                                <button type="submit" class="btn btn-sm btn-danger ms-1" title="Zwolnij miejsce">
+                                                    <i class="bi bi-person-dash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">Wolne miejsce</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="p-4 text-center text-muted">
+                    Brak zdefiniowanych stanowisk w tym projekcie.
+                </div>
+            }
+        </div>
+    </div>
+</div>
