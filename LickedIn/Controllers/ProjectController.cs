@@ -185,36 +185,156 @@ namespace LickedIn.Controllers
         {
             if (id == null) return NotFound();
 
-            var project = await _context.Projects.FindAsync(id);
+            var project = await _context.Projects
+                .Include(p => p.ProjectMembers)
+                    .ThenInclude(pm => pm.RequiredSkills)
+                .Include(p => p.ProjectMembers)
+                    .ThenInclude(pm => pm.Employee)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (project == null) return NotFound();
 
+            // Mapowanie na ViewModel
+            var model = new ProjectEditViewModel
+            {
+                Id = project.Id,
+                Name = project.Name,
+                ManagerId = project.ManagerId,
+                StartDate = project.StartDate,
+                EndDate = project.EndDate,
+                TeamMembers = project.ProjectMembers.Select(pm => new ProjectMemberEditDto
+                {
+                    Id = pm.Id,
+                    EmployeeId = pm.EmployeeId,
+                    EmployeeName = pm.Employee != null ? $"{pm.Employee.FirstName} {pm.Employee.LastName}" : null,
+                    RequiredSkills = pm.RequiredSkills.Select(s => new VacancySkillRequirement
+                    {
+                        SkillTypeId = s.SkillTypeId,
+                        Level = s.Level
+                    }).ToList()
+                }).ToList()
+            };
+
             ViewData["ManagerId"] = new SelectList(_context.Employees, "Id", "LastName", project.ManagerId);
-            return View(project);
+            ViewData["Skills"] = _context.SkillTypes.ToList(); // Potrzebne do dropdownów w JS
+            return View(model);
         }
 
         // POST: Project/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,StartDate,EndDate,ManagerId")] Project project)
+        public async Task<IActionResult> Edit(int id, ProjectEditViewModel model)
         {
-            if (id != project.Id) return NotFound();
+            if (id != model.Id) return NotFound();
 
             if (ModelState.IsValid)
             {
+                using var transaction = _context.Database.BeginTransaction();
                 try
                 {
-                    _context.Update(project);
+                    // 1. Pobierz aktualny stan z bazy (do porównania)
+                    var projectDb = await _context.Projects
+                        .Include(p => p.ProjectMembers)
+                            .ThenInclude(pm => pm.Employee)
+                        .Include(p => p.ProjectMembers)
+                            .ThenInclude(pm => pm.RequiredSkills)
+                        .FirstOrDefaultAsync(p => p.Id == id);
+
+                    if (projectDb == null) return NotFound();
+
+                    // 2. Aktualizacja danych podstawowych
+                    projectDb.Name = model.Name;
+                    projectDb.ManagerId = model.ManagerId;
+                    projectDb.StartDate = model.StartDate;
+                    projectDb.EndDate = model.EndDate;
+
+                    // 3. LOGIKA ZARZĄDZANIA WAKATAMI
+                    
+                    // A. Wykrywanie usuniętych wakatów
+                    // (Te, które są w bazie, ale nie ma ich w przesłanym formularzu w polu Id)
+                    var submittedIds = model.TeamMembers.Where(x => x.Id != 0).Select(x => x.Id).ToList();
+                    var membersToDelete = projectDb.ProjectMembers.Where(pm => !submittedIds.Contains(pm.Id)).ToList();
+
+                    foreach (var memberToDelete in membersToDelete)
+                    {
+                        // KLUCZOWY WARUNEK Z ZADANIA:
+                        if (memberToDelete.EmployeeId != null)
+                        {
+                            // Wakat jest zajęty! Blokujemy operację.
+                            ModelState.AddModelError("", 
+                                $"Nie można usunąć wakatu, który jest wypełniany przez pracownika: {memberToDelete.Employee?.FirstName} {memberToDelete.Employee?.LastName}. Najpierw zwolnij pracownika z projektu.");
+                            
+                            // Musimy przywrócić dane do widoku
+                            ViewData["ManagerId"] = new SelectList(_context.Employees, "Id", "LastName", model.ManagerId);
+                            ViewData["Skills"] = _context.SkillTypes.ToList();
+                            return View(model);
+                        }
+                        
+                        // Jeśli pusty - usuwamy
+                        _context.ProjectMembers.Remove(memberToDelete);
+                    }
+
+                    // B. Aktualizacja istniejących i dodawanie nowych
+                    foreach (var memberDto in model.TeamMembers)
+                    {
+                        if (memberDto.Id > 0)
+                        {
+                            // -- Aktualizacja istniejącego --
+                            var existingMember = projectDb.ProjectMembers.FirstOrDefault(pm => pm.Id == memberDto.Id);
+                            if (existingMember != null)
+                            {
+                                // Aktualizujemy umiejętności (najprościej: usuń stare, dodaj nowe)
+                                _context.VacancySkills.RemoveRange(existingMember.RequiredSkills);
+                                
+                                foreach (var skillDto in memberDto.RequiredSkills)
+                                {
+                                    _context.VacancySkills.Add(new VacancySkill
+                                    {
+                                        ProjectMemberId = existingMember.Id,
+                                        SkillTypeId = skillDto.SkillTypeId,
+                                        Level = skillDto.Level
+                                    });
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // -- Dodawanie nowego wakatu --
+                            var newMember = new ProjectMember
+                            {
+                                ProjectId = projectDb.Id,
+                                EmployeeId = null, // Nowy wakat jest pusty
+                            };
+                            _context.ProjectMembers.Add(newMember);
+                            await _context.SaveChangesAsync(); // Zapisz, by dostać ID
+
+                            foreach (var skillDto in memberDto.RequiredSkills)
+                            {
+                                _context.VacancySkills.Add(new VacancySkill
+                                {
+                                    ProjectMemberId = newMember.Id,
+                                    SkillTypeId = skillDto.SkillTypeId,
+                                    Level = skillDto.Level
+                                });
+                            }
+                        }
+                    }
+
                     await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (Exception ex)
                 {
-                    if (!ProjectExists(project.Id)) return NotFound();
-                    else throw;
+                    await transaction.RollbackAsync();
+                    ModelState.AddModelError("", "Błąd zapisu: " + ex.Message);
                 }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["ManagerId"] = new SelectList(_context.Employees, "Id", "LastName", project.ManagerId);
-            return View(project);
+
+            ViewData["ManagerId"] = new SelectList(_context.Employees, "Id", "LastName", model.ManagerId);
+            ViewData["Skills"] = _context.SkillTypes.ToList();
+            return View(model);
         }
 
         // GET: Project/Delete/5
