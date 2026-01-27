@@ -43,4 +43,38 @@
         </div>
     </div>
 
+    <div class="col-md-5 mb-4">
+        <div class="card h-100 shadow-sm border-0 hover-shadow">
+            <div class="card-body text-center p-5">
+                <div class="display-1 text-info mb-3">
+                    <i class="bi bi-briefcase-fill"></i>
+                </div>
+                <h3 class="card-title">Projekty</h3>
+                <p class="card-text text-muted">
+                    Twórz nowe projekty, buduj zespoły projektowe i przydzielaj role na podstawie kompetencji.
+                </p>
+                <a asp-controller="Project" asp-action="Index" class="btn btn-outline-info btn-lg mt-3">
+                    Zarządzaj Projektami
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-5 mb-4">
+        <div class="card h-100 shadow-sm border-0 hover-shadow">
+            <div class="card-body text-center p-5">
+                <div class="display-1 text-warning mb-3">
+                    <i class="bi bi-star-fill"></i>
+                </div>
+                <h3 class="card-title">System Ocen</h3>
+                <p class="card-text text-muted">
+                    Wystawiaj oceny zaangażowania po zakończeniu projektów i generuj propozycje rozwoju.
+                </p>
+                <a asp-controller="Rating" asp-action="Dashboard" class="btn btn-outline-warning btn-lg mt-3">
+                    Panel Oceniania
+                </a>
+            </div>
+        </div>
+    </div>
+
 </div>

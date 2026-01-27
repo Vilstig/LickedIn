@@ -1,0 +1,53 @@
+@model LickedIn.Models.Project
+
+@{
+    ViewData["Title"] = "Szczegóły Projektu";
+}
+
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">@Model.Name</h2>
+            @if(Model.EndDate == null)
+            {
+                <a asp-action="CloseProject" asp-route-id="@Model.Id" class="btn btn-danger">Zakończ Projekt</a>
+            }
+            else
+            {
+                <span class="badge bg-secondary">Projekt Zamknięty</span>
+            }
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-3">Data Startu</dt>
+                <dd class="col-sm-9">@Model.StartDate</dd>
+                <dt class="col-sm-3">Data Końca</dt>
+                <dd class="col-sm-9">@(Model.EndDate.HasValue ? Model.EndDate.ToString() : "W toku")</dd>
+            </dl>
+        </div>
+    </div>
+
+    <h3>Zespół projektowy</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Pracownik</th>
+                <th>Rola</th>
+                <th>Od</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var assign in Model.Assignments)
+            {
+                <tr>
+                    <td>@assign.Employee?.FirstName @assign.Employee?.LastName</td>
+                    <td>@assign.Role</td>
+                    <td>@assign.StartDate</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    
+    <a asp-controller="ProjectRole" asp-action="Manage" asp-route-projectId="@Model.Id" class="btn btn-outline-primary">Zarządzaj Rolami</a>
+    <a asp-action="Index" class="btn btn-secondary">Powrót</a>
+</div>

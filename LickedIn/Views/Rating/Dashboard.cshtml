@@ -1,0 +1,39 @@
+@model IEnumerable<LickedIn.Models.Project>
+
+@{
+    ViewData["Title"] = "Panel Oceniania";
+}
+
+<div class="container mt-4">
+    <div class="alert alert-info">
+        Tutaj znajdują się projekty zakończone, które wymagają oceny członków zespołu.
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <h2>Projekty do oceny</h2>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Nazwa Projektu</th>
+                <th>Data Zakończenia</th>
+                <th>Akcja</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.EndDate</td>
+                    <td>
+                        <a asp-action="ProjectMembers" asp-route-projectId="@item.Id" class="btn btn-primary">Oceń zespół</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

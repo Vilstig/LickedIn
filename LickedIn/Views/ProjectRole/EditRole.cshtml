@@ -1,0 +1,45 @@
+@model LickedIn.Models.ProjectAssignment
+
+@{
+    ViewData["Title"] = "Edytuj Rolę";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h4>Zmiana roli w projekcie</h4>
+                </div>
+                <div class="card-body">
+                    <p>Pracownik: <strong>@ViewBag.EmployeeName</strong></p>
+                    <p>Projekt: <strong>@ViewBag.ProjectName</strong></p>
+                    <hr />
+
+                    <form asp-action="EditRole">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="ProjectId" />
+                        <input type="hidden" asp-for="EmployeeId" />
+                        <input type="hidden" asp-for="StartDate" />
+
+                        <div class="form-group mb-4">
+                            <label asp-for="Role" class="control-label fw-bold">Wybierz nową rolę</label>
+                            <select asp-for="Role" class="form-control" asp-items="ViewBag.Role"></select>
+                            <span asp-validation-for="Role" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <input type="submit" value="Zapisz zmiany" class="btn btn-warning" />
+                            <a asp-action="Manage" asp-route-projectId="@Model.ProjectId" class="btn btn-secondary">Anuluj</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

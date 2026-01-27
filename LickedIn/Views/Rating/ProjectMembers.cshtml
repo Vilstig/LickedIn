@@ -1,0 +1,63 @@
+@model LickedIn.Models.Project
+
+@{
+    ViewData["Title"] = "Wybór członka do oceny";
+}
+
+<div class="container mt-4">
+    <h2>Ocenianie: @Model.Name</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    
+    @if (TempData["DevelopmentProposal"] != null)
+    {
+        <div class="alert alert-warning border-warning">
+            <i class="bi bi-lightbulb-fill"></i> <strong>System HR:</strong> @TempData["DevelopmentProposal"]
+        </div>
+    }
+
+    <p class="text-muted">Po wystawieniu oceny, możliwość edycji zostaje zablokowana.</p>
+
+    <div class="row">
+        @foreach (var assign in Model.Assignments)
+        {
+            bool isRated = assign.Ratings.Any();
+
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 @(isRated ? "bg-light border-success" : "")">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">@assign.Employee?.FirstName @assign.Employee?.LastName</h5>
+                        <p class="card-text text-muted">Rola: @assign.Role</p>
+                        
+                        @if (isRated)
+                        {
+                            <div class="text-success fw-bold mb-2">
+                                <i class="bi bi-check-circle-fill"></i> Oceniono
+                            </div>
+                            <button class="btn btn-secondary btn-sm" disabled>Ocena wystawiona</button>
+                        }
+                        else
+                        {
+                            <a asp-action="Rate" asp-route-assignmentId="@assign.Id" class="btn btn-outline-primary">Wystaw ocenę</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    
+    @{
+        bool allRated = Model.Assignments.All(a => a.Ratings.Any());
+    }
+    @if(allRated && Model.Assignments.Any())
+    {
+        <div class="alert alert-success mt-4 text-center">
+            Wszyscy członkowie zespołu zostali ocenieni. Proces zakończony.
+        </div>
+    }
+
+    <a asp-action="Dashboard" class="btn btn-secondary mt-3">Powrót do panelu</a>
+</div>
