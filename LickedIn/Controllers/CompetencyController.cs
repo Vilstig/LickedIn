@@ -90,7 +90,6 @@ namespace LickedIn.Controllers
         {
             if (id != competency.Id) return NotFound();
 
-            
             var existingCompetency = await _context.Competencies
                 .Include(c => c.Employee) 
                 .FirstOrDefaultAsync(c => c.Id == id);

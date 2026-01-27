@@ -1,0 +1,42 @@
+@model IEnumerable<LickedIn.Models.Project>
+
+@{
+    ViewData["Title"] = "Projekty";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Lista Projektów</h1>
+        <a asp-action="Create" class="btn btn-primary">Nowy Projekt</a>
+    </div>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Nazwa</th>
+                <th>Data Startu</th>
+                <th>Data Końca</th>
+                <th>Status</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.StartDate</td>
+                    <td>@(item.EndDate.HasValue ? item.EndDate.Value.ToString() : "-")</td>
+                    <td>
+                        @if(item.EndDate.HasValue) { <span class="badge bg-secondary">Zakończony</span> }
+                        else { <span class="badge bg-success">W toku</span> }
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info text-white">Szczegóły</a>
+                        <a asp-controller="ProjectRole" asp-action="Manage" asp-route-projectId="@item.Id" class="btn btn-sm btn-outline-dark">Zespół</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

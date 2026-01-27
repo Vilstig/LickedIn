@@ -19,7 +19,7 @@ namespace LickedIn.Controllers
         public async Task<IActionResult> Index()
         {
             var employees = await _context.Employees
-                .AsNoTracking() 
+                .AsNoTracking()
                 .ToListAsync();
                 
             return View(employees);
@@ -51,7 +51,21 @@ namespace LickedIn.Controllers
 
         public async Task<IActionResult> Details(int? id)
         {
-            return View(await GetEmployeeWithCompetenciesAsync(id));
+            if (id == null) return NotFound();
+
+            var employee = await _context.Employees
+                .Include(e => e.Competencies)
+                .ThenInclude(c => c.SkillType)
+                // Twoje dodatkowe Includes:
+                .Include(e => e.ProjectAssignments)
+                .ThenInclude(pa => pa.Project)
+                .Include(e => e.ProjectAssignments)
+                .ThenInclude(pa => pa.Ratings)
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            if (employee == null) return NotFound();
+
+            return View(employee);
         }
 
         public async Task<IActionResult> Edit(int? id)
@@ -117,17 +131,7 @@ namespace LickedIn.Controllers
         private async Task<Employee?> GetEmployeeAsync(int? id)
         {
             if (id == null) return null;
-
             return await _context.Employees.FindAsync(id);
-        }
-        private async Task<Employee?> GetEmployeeWithCompetenciesAsync(int? id)
-        {
-            if (id == null) return null;
-
-            return await _context.Employees
-                .Include(e => e.Competencies)
-                .ThenInclude(c => c.SkillType)
-                .FirstOrDefaultAsync(e => e.Id == id);
         }
 
         private bool EmployeeExists(int id)

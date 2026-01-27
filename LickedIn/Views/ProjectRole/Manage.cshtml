@@ -1,0 +1,64 @@
+@model IEnumerable<LickedIn.Models.ProjectAssignment>
+
+@{
+    ViewData["Title"] = "Zarządzaj Rolami";
+    bool isClosed = (bool)ViewBag.IsProjectClosed;
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2>Zespół: @ViewBag.ProjectName</h2>
+        @if (isClosed)
+        {
+            <span class="badge bg-danger fs-6">Projekt Zakończony (Tryb tylko do odczytu)</span>
+        }
+    </div>
+    
+    @if (!isClosed)
+    {
+        <div class="mb-3 mt-3">
+            <a asp-action="Assign" asp-route-projectId="@ViewBag.ProjectId" class="btn btn-success">
+                <i class="bi bi-person-plus"></i> Przypisz nową rolę
+            </a>
+        </div>
+    }
+
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th>Pracownik</th>
+                <th>Rola</th>
+                <th>Data przypisania</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Employee?.FirstName @item.Employee?.LastName</td>
+                    <td>@item.Role</td>
+                    <td>@item.StartDate</td>
+                    <td>
+                        @if (!isClosed)
+                        {
+                            <div class="d-flex gap-2">
+                                <a asp-action="EditRole" asp-route-id="@item.Id" class="btn btn-sm btn-warning">
+                                    Edytuj
+                                </a>
+                                <form asp-action="Remove" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Czy na pewno usunąć tę rolę?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">Usuń</button>
+                                </form>
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-muted small">Brak akcji</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <a asp-controller="Project" asp-action="Details" asp-route-id="@ViewBag.ProjectId" class="btn btn-secondary">Powrót do projektu</a>
+</div>

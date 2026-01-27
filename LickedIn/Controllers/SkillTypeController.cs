@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace LickedIn.Controllers
 {
     [Authorize(Policy = "HR")]
@@ -18,14 +17,12 @@ namespace LickedIn.Controllers
             _context = context;
         }
 
-        // 1. Lista wszystkich dostępnych umiejętności (np. tabela)
         // GET: SkillType
         public async Task<IActionResult> Index()
         {
             return View(await _context.SkillTypes.ToListAsync());
         }
 
-        // 2. Formularz dodawania nowej nazwy (np. "C#")
         // GET: SkillType/Create
         public IActionResult Create()
         {
@@ -37,7 +34,6 @@ namespace LickedIn.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name")] SkillType skillType)
         {
-            // Sprawdzenie czy taka nazwa już istnieje
             if (await _context.SkillTypes.AnyAsync(s => s.Name.ToLower() == skillType.Name.ToLower()))
             {
                 ModelState.AddModelError("Name", "Taka umiejętność już istnieje w bazie.");

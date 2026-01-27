@@ -25,15 +25,12 @@
         </div>
     </div>
 
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <span>Kompetencje</span>
             <div>
                 <a asp-controller="Competency" asp-action="Create" asp-route-employeeId="@Model.Id" class="btn btn-success btn-sm">
                     + Przypisz umiejętność
-                </a>
-                <a asp-controller="SkillType" asp-action="Create" class="btn btn-outline-primary btn-sm">
-                    + Nowy typ umiejętności
                 </a>
             </div>
         </div>
@@ -70,6 +67,68 @@
             else
             {
                 <p class="text-muted">Ten pracownik nie ma jeszcze przypisanych żadnych kompetencji.</p>
+            }
+        </div>
+    </div>
+
+    <div class="card border-primary">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Historia Projektów i Ocen</h5>
+        </div>
+        <div class="card-body">
+            @if(Model.ProjectAssignments != null && Model.ProjectAssignments.Any())
+            {
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Projekt</th>
+                            <th>Rola</th>
+                            <th>Okres</th>
+                            <th>Ocena</th>
+                            <th>Komentarz</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(var assign in Model.ProjectAssignments)
+                        {
+                            var rating = assign.Ratings.FirstOrDefault();
+                            <tr>
+                                <td class="fw-bold">@assign.Project?.Name</td>
+                                <td>@assign.Role</td>
+                                <td>
+                                    @assign.StartDate <br/>
+                                    <small class="text-muted">
+                                        @(assign.Project?.EndDate.HasValue == true ? "do " + assign.Project.EndDate : "(w toku)")
+                                    </small>
+                                </td>
+                                <td>
+                                    @if(rating != null)
+                                    {
+                                        <span class="badge bg-success fs-6">@rating.Score / 10</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if(rating != null)
+                                    {
+                                        <span class="fst-italic text-muted">"@rating.Comment"</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Brak oceny</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-muted">Pracownik nie brał jeszcze udziału w żadnym projekcie.</p>
             }
         </div>
     </div>
