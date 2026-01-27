@@ -11,17 +11,21 @@
         <div class="card-header">Dane osobowe</div>
         <div class="card-body">
             <dl class="row">
-                <dt class="col-sm-3">Email</dt>
-                <dd class="col-sm-9">@Model.Email</dd>
-
-                <dt class="col-sm-3">Telefon</dt>
-                <dd class="col-sm-9">@Model.PhoneNumber</dd>
-
                 <dt class="col-sm-3">PESEL</dt>
                 <dd class="col-sm-9">@Model.Pesel</dd>
             </dl>
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edytuj dane</a>
-            <a asp-action="Index" class="btn btn-secondary">Powrót do listy</a>
+
+            <div class="mt-3">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                    <i class="bi bi-pencil"></i> Edytuj dane
+                </a>
+                
+                <a asp-controller="Home" asp-action="WorkInProgress" class="btn btn-info text-white">
+                    <i class="bi bi-graph-up"></i> Zaangażowanie
+                </a>
+
+                <a asp-action="Index" class="btn btn-secondary">Powrót do listy</a>
+            </div>
         </div>
     </div>
 
@@ -49,7 +53,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Model.Competencies)
+                        @foreach (Competency item in Model.Competencies)
                         {
                             <tr>
                                 <td>@item.SkillType?.Name</td>
