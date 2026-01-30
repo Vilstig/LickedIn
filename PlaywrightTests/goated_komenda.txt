@@ -1,0 +1,3 @@
+dotnet tool run playwright codegen <your_url>
+
+Możecie sobie klikać i wam samo napisze kod c#

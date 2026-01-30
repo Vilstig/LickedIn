@@ -55,7 +55,7 @@ namespace LickedIn.Controllers
             {
                 _context.Add(competency);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Index", "Employee");
+                return RedirectToAction("Details", "Employee", new { id = competency.EmployeeId });
             }
 
             var employee = await _context.Employees.FindAsync(competency.EmployeeId);
@@ -111,7 +111,7 @@ namespace LickedIn.Controllers
                     if (!CompetencyExists(competency.Id)) return NotFound();
                     else throw;
                 }
-                return RedirectToAction("Index", "Employee");
+                return RedirectToAction("Details", "Employee", new { id = existingCompetency.EmployeeId });
             }
 
             ViewBag.EmployeeName = $"{existingCompetency.Employee.FirstName} {existingCompetency.Employee.LastName}";
@@ -143,8 +143,10 @@ namespace LickedIn.Controllers
             var competency = await _context.Competencies.FindAsync(id);
             if (competency != null)
             {
+                int employeeId = competency.EmployeeId;
                 _context.Competencies.Remove(competency);
                 await _context.SaveChangesAsync();
+                return RedirectToAction("Details", "Employee", new { id = employeeId });
             }
             return RedirectToAction("Index", "Employee");
         }
