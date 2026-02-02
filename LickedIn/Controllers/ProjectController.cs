@@ -115,30 +115,33 @@ namespace LickedIn.Controllers
                             }
 
                             // Jeśli znaleziono kandydata (nawet słabego), przypisujemy go
+                            // Niezależnie od tego, czy znaleziono kandydata, tworzymy wakat (ProjectMember)
+                            var member = new ProjectMember
+                            {
+                                ProjectId = project.Id,
+                                EmployeeId = bestMatch?.Id // Może być null, jeśli nikogo nie znaleziono
+                            };
+
                             if (bestMatch != null)
                             {
-                                assignedEmployeeIds.Add(bestMatch.Id); // Zablokuj go
+                                assignedEmployeeIds.Add(bestMatch.Id); // Zablokuj pracownika
+                            }
 
-                                var member = new ProjectMember
-                                {
-                                    ProjectId = project.Id,
-                                    EmployeeId = bestMatch.Id
-                                };
-                                _context.Add(member);
-                                await _context.SaveChangesAsync(); // Zapisz, by mieć ID
+                            _context.Add(member);
+                            await _context.SaveChangesAsync(); // Zapisz, by mieć ID do VacancySkill
 
-                                // Zapisujemy wymagania wakatu (historia, co było potrzebne na to stanowisko)
-                                if (memberReq.RequiredSkills != null)
+                            // Zapisujemy wymagania wakatu (historia, co było potrzebne na to stanowisko)
+                            // TO MUSI SIĘ DZIAĆ ZAWSZE, nawet dla pustego wakatu
+                            if (memberReq.RequiredSkills != null)
+                            {
+                                foreach (var skillReq in memberReq.RequiredSkills)
                                 {
-                                    foreach (var skillReq in memberReq.RequiredSkills)
+                                    _context.Add(new VacancySkill
                                     {
-                                        _context.Add(new VacancySkill
-                                        {
-                                            ProjectMemberId = member.Id,
-                                            SkillTypeId = skillReq.SkillTypeId,
-                                            Level = skillReq.Level
-                                        });
-                                    }
+                                        ProjectMemberId = member.Id,
+                                        SkillTypeId = skillReq.SkillTypeId,
+                                        Level = skillReq.Level
+                                    });
                                 }
                             }
                         }
