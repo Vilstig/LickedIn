@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace LickedIn.Models.ViewModels
 {
-    public class ProjectCreateViewModel
+    public class ProjectCreateViewModel : IValidatableObject
     {
         // --- Dane Projektu ---
         [Required(ErrorMessage = "Nazwa jest wymagana")]
@@ -17,6 +17,17 @@ namespace LickedIn.Models.ViewModels
 
         // --- Lista Wakatów (Członków Zespołu) ---
         public List<ProjectMemberRequirement> TeamMembers { get; set; } = new List<ProjectMemberRequirement>();
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (EndDate.HasValue && EndDate < StartDate)
+            {
+                yield return new ValidationResult(
+                    "Data zakończenia nie może być wcześniejsza niż data rozpoczęcia.", 
+                    new[] { nameof(EndDate) }
+                );
+            }
+        }
     }
 
     public class ProjectMemberRequirement
