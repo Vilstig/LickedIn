@@ -81,6 +81,7 @@ public class FjTests
 
         string uniquePesel = DateTime.Now.Ticks.ToString().Substring(7, 11);
         string uniqueLastName = "Tester_" + DateTime.Now.Ticks;
+        string skillName = "Angielski";
         try
         {
           await CreateEmployeeAsync(page, uniqueLastName, uniquePesel);
@@ -88,14 +89,14 @@ public class FjTests
             var employeeRow = page.Locator("tr").Filter(new() { HasText = uniqueLastName });
             await employeeRow.GetByRole(AriaRole.Link, new() { Name = "Szczegóły" }).ClickAsync();
             await page.GetByRole(AriaRole.Link, new() { Name = "+ Przypisz umiejętność" }).ClickAsync();
-            await page.GetByLabel("Wybierz umiejętność").SelectOptionAsync(new[] { "3" });
+            await page.GetByLabel("Wybierz umiejętność").SelectOptionAsync(skillName);
             await page.GetByRole(AriaRole.Spinbutton, new() { Name = "Poziom (1-10)" }).ClickAsync();
             await page.GetByRole(AriaRole.Spinbutton, new() { Name = "Poziom (1-10)" }).FillAsync("4");
             await page.GetByRole(AriaRole.Button, new() { Name = "Przypisz" }).ClickAsync();
 
             await Assertions.Expect(page).ToHaveURLAsync(new Regex(".*/Employee/Details/.*"));
 
-            var competencyRow = page.Locator("tr").Filter(new() { HasText = "Angielski" });
+            var competencyRow = page.Locator("tr").Filter(new() { HasText = skillName });
 
             await Assertions.Expect(competencyRow).ToBeVisibleAsync();
 
