@@ -65,7 +65,7 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
-LickedIn/auth.json
+LickedIn/AdamPwTests/auth.json
 LickedIn/package-lock.json
 LickedIn/package.json
 LickedIn/playwright.config.ts

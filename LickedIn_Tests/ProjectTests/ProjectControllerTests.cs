@@ -57,7 +57,7 @@ namespace LickedIn_Tests.ProjectTests
                         RoleName = "Backend Dev",
                         RequiredSkills = new List<VacancySkillRequirement>
                         {
-                            new VacancySkillRequirement { SkillTypeId = 1, Level = 5 } // Wymagany poziom 5
+                            new VacancySkillRequirement { SkillTypeId = 1, Level = 5 }
                         }
                     }
                 }

@@ -8,7 +8,6 @@ namespace LickedIn_Tests.ProjectTests
         [Fact]
         public void Validate_EndDateBeforeStartDate_ReturnsError() // sprawdzamy czy nie mozemy stworzyć projektu z datą zakończenia przed datą rozpoczęcia
         {
-            // Arrange
             var project = new Project
             {
                 Name = "Test Project",
@@ -55,7 +54,7 @@ namespace LickedIn_Tests.ProjectTests
                 Name = "Test Project",
                 ManagerId = 1,
                 StartDate = new DateOnly(2024, 1, 10),
-                EndDate = null // Dozwolone
+                EndDate = null
             };
 
             var validationContext = new ValidationContext(project);
