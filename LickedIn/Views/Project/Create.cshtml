@@ -70,21 +70,17 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
     <script>
-        // Przygotowanie danych słownikowych do JS
         const availableSkills = @Json.Serialize(skills.Select(s => new { value = s.Id, text = s.Name }));
-        // Dane z modelu (jeśli wracamy po błędzie walidacji)
         const initialMembers = @Json.Serialize(Model.TeamMembers);
         
         let memberIndex = 0;
 
         document.addEventListener("DOMContentLoaded", () => {
             if (initialMembers && initialMembers.length > 0) {
-                // Odtwarzamy stan formularza
                 initialMembers.forEach(member => {
                     addMemberCard(member);
                 });
             } else {
-                // Domyślnie jedna pusta karta
                 addMemberCard();
             }
         });
@@ -124,13 +120,11 @@
 
             container.appendChild(card);
             
-            // Dodajemy umiejętności
             if (data && data.requiredSkills && data.requiredSkills.length > 0) {
                 data.requiredSkills.forEach(skill => {
                     addSkillRow(memberIndex, skill);
                 });
             } else {
-                // Domyślnie jeden pusty wiersz
                 addSkillRow(memberIndex);
             }
             

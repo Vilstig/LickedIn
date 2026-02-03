@@ -122,7 +122,6 @@
 
     <script>
         const availableSkills = @Json.Serialize(skills.Select(s => new { value = s.Id, text = s.Name }));
-        // Ustawiamy indeks na podstawie liczby istniejących elementów, żeby nie nadpisać danych
         let memberIndex = @Model.TeamMembers.Count;
 
         function addMemberCard() {
@@ -186,19 +185,15 @@
             reindexMembers();
         }
 
-        // Ważne: przy usuwaniu ze środka listy trzeba przenumerować indeksy,
-        // inaczej MVC Model Binder zgubi elementy po "dziurze".
         function reindexMembers() {
             const cards = document.querySelectorAll('.member-card');
             cards.forEach((card, mIdx) => {
-                // Aktualizuj ukryte pola ID
                 const idInput = card.querySelector('input[name*="].Id"]');
                 if(idInput) idInput.name = `TeamMembers[${mIdx}].Id`;
                 
                 const empIdInput = card.querySelector('input[name*="].EmployeeId"]');
                 if(empIdInput) empIdInput.name = `TeamMembers[${mIdx}].EmployeeId`;
 
-                // Aktualizuj listę skilli
                 const tbody = card.querySelector('tbody');
                 tbody.id = `skillsList_${mIdx}`;
                 

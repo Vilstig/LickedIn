@@ -70,3 +70,4 @@ LickedIn/package-lock.json
 LickedIn/package.json
 LickedIn/playwright.config.ts
 LickedIn/.github/
+LickedIn/test-results/
