@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace LickedIn.Models.ViewModels
 {
-    public class ProjectEditViewModel
+    public class ProjectEditViewModel : IValidatableObject
     {
         public int Id { get; set; }
 
@@ -18,6 +18,17 @@ namespace LickedIn.Models.ViewModels
 
         // Lista wakatów (istniejących i nowych)
         public List<ProjectMemberEditDto> TeamMembers { get; set; } = new List<ProjectMemberEditDto>();
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (EndDate.HasValue && EndDate < StartDate)
+            {
+                yield return new ValidationResult(
+                    "Data zakończenia nie może być wcześniejsza niż data rozpoczęcia.",
+                    new[] { nameof(EndDate) }
+                );
+            }
+        }
     }
 
     public class ProjectMemberEditDto
