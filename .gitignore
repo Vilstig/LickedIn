@@ -57,3 +57,17 @@ nunit-*.xml
 *.db
 *.db-shm
 *.db-wal
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+LickedIn/AdamPwTests/auth.json
+LickedIn/package-lock.json
+LickedIn/package.json
+LickedIn/playwright.config.ts
+LickedIn/.github/
+LickedIn/test-results/

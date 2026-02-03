@@ -18,23 +18,18 @@ namespace LickedIn.Models
         [Display(Name = "Data zakończenia")]
         public DateOnly? EndDate { get; set; }
 
-        // Kierownik projektu (FK)
         [Required]
         public int ManagerId { get; set; }
         
         [ForeignKey("ManagerId")]
         public Employee? Manager { get; set; }
 
-        // Relacja do członków zespołu
         public ICollection<ProjectMember> ProjectMembers { get; set; } = new List<ProjectMember>();
 
-        // 2. Implementujemy metodę Validate
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            // Sprawdzamy logiczny warunek: jeśli data końca istnieje I jest mniejsza niż start
             if (EndDate.HasValue && EndDate < StartDate)
             {
-                // Zwracamy błąd przypisany konkretnie do pola "EndDate"
                 yield return new ValidationResult(
                     "Data zakończenia nie może być wcześniejsza niż data rozpoczęcia.", 
                     new[] { nameof(EndDate) }

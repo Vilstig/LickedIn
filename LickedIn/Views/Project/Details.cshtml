@@ -2,7 +2,6 @@
 
 @{
     ViewData["Title"] = "Szczegóły Projektu";
-    // Sprawdzamy, czy są jakieś nieobsadzone wakaty
     bool hasVacancies = Model.ProjectMembers.Any(m => m.EmployeeId == null);
 }
 

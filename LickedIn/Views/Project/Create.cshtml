@@ -36,6 +36,7 @@
                     <div class="col-md-6 mb-3">
                         <label asp-for="EndDate" class="form-label fw-bold">Data Końca</label>
                         <input asp-for="EndDate" type="date" class="form-control" />
+                        <span asp-validation-for="EndDate" class="text-danger"></span>
                     </div>
                 </div>
 
@@ -69,16 +70,29 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
     <script>
-        // Przygotowanie danych słownikowych do JS
         const availableSkills = @Json.Serialize(skills.Select(s => new { value = s.Id, text = s.Name }));
+        const initialMembers = @Json.Serialize(Model.TeamMembers);
+        
         let memberIndex = 0;
 
-        function addMemberCard() {
+        document.addEventListener("DOMContentLoaded", () => {
+            if (initialMembers && initialMembers.length > 0) {
+                initialMembers.forEach(member => {
+                    addMemberCard(member);
+                });
+            } else {
+                addMemberCard();
+            }
+        });
+
+        function addMemberCard(data = null) {
             const container = document.getElementById('membersContainer');
             
             const card = document.createElement('div');
             card.className = 'card mb-3 border-secondary member-card';
             card.setAttribute('data-index', memberIndex);
+
+            const roleNameValue = data ? data.roleName : '';
 
             card.innerHTML = `
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
@@ -90,7 +104,7 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <label class="form-label">Nazwa stanowiska (opcjonalnie)</label>
-                        <input name="TeamMembers[${memberIndex}].RoleName" class="form-control" placeholder="np. Senior Backend Dev" />
+                        <input name="TeamMembers[${memberIndex}].RoleName" class="form-control" placeholder="np. Senior Backend Dev" value="${roleNameValue}" />
                     </div>
                     
                     <h6 class="text-muted border-bottom pb-1">Wymagane umiejętności dla tej osoby:</h6>
@@ -106,19 +120,28 @@
 
             container.appendChild(card);
             
-            // Automatycznie dodaj pierwszy wiersz umiejętności dla wygody
-            addSkillRow(memberIndex);
+            if (data && data.requiredSkills && data.requiredSkills.length > 0) {
+                data.requiredSkills.forEach(skill => {
+                    addSkillRow(memberIndex, skill);
+                });
+            } else {
+                addSkillRow(memberIndex);
+            }
             
             memberIndex++;
         }
 
-        function addSkillRow(currentMemberIdx) {
+        function addSkillRow(currentMemberIdx, skillData = null) {
             const tbody = document.getElementById(`skillsList_${currentMemberIdx}`);
-            // Policz ile już jest wierszy w tej tabeli, żeby nadać indeks
             const skillIndex = tbody.children.length;
 
             let options = '<option value="" disabled selected>-- Wybierz umiejętność --</option>';
-            availableSkills.forEach(s => options += `<option value="${s.value}">${s.text}</option>`);
+            availableSkills.forEach(s => {
+                const selected = (skillData && s.value == skillData.skillTypeId) ? 'selected' : '';
+                options += `<option value="${s.value}" ${selected}>${s.text}</option>`;
+            });
+
+            const levelValue = skillData ? skillData.level : 1;
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -129,7 +152,7 @@
                 </td>
                 <td width="30%">
                     <input type="number" name="TeamMembers[${currentMemberIdx}].RequiredSkills[${skillIndex}].Level" 
-                           class="form-control form-control-sm" placeholder="Poziom" min="1" max="10" value="1" required />
+                           class="form-control form-control-sm" placeholder="Poziom" min="1" max="10" value="${levelValue}" required />
                 </td>
                 <td width="10%" class="text-end">
                     <button type="button" class="btn btn-outline-danger btn-sm border-0" onclick="this.closest('tr').remove()">
@@ -143,32 +166,23 @@
         function removeMember(btn) {
             const card = btn.closest('.member-card');
             card.remove();
-            // Uwaga: W idealnym świecie powinniśmy przenumerować indeksy [0], [1]...
-            // ASP.NET Core MVC Model Binder zazwyczaj radzi sobie z dziurami w indeksach,
-            // ale jeśli formularz się nie przesyła poprawnie, trzeba dodać funkcję reindex().
             reindexMembers();
         }
 
-        // Funkcja naprawiająca indeksy po usunięciu elementu ze środka
         function reindexMembers() {
             const cards = document.querySelectorAll('.member-card');
             cards.forEach((card, mIdx) => {
-                // Aktualizuj nagłówek
                 card.querySelector('.fw-bold').innerText = `Wakat #${mIdx + 1}`;
                 
-                // Aktualizuj input RoleName
                 const roleInput = card.querySelector('input[name*="RoleName"]');
                 if(roleInput) roleInput.name = `TeamMembers[${mIdx}].RoleName`;
 
-                // Aktualizuj tabelę skilli
                 const tbody = card.querySelector('tbody');
                 tbody.id = `skillsList_${mIdx}`;
                 
-                // Aktualizuj przycisk dodawania skilla
                 const addSkillBtn = card.querySelector('button[onclick*="addSkillRow"]');
                 addSkillBtn.setAttribute('onclick', `addSkillRow(${mIdx})`);
 
-                // Aktualizuj same skille wewnątrz
                 const rows = tbody.querySelectorAll('tr');
                 rows.forEach((row, sIdx) => {
                     const select = row.querySelector('select');
@@ -177,13 +191,7 @@
                     if(input) input.name = `TeamMembers[${mIdx}].RequiredSkills[${sIdx}].Level`;
                 });
             });
-            // Reset licznika globalnego (niekonieczne przy pełnym reindexie, ale bezpieczne)
             memberIndex = cards.length;
         }
-
-        // Dodaj jedną pustą kartę na start
-        document.addEventListener("DOMContentLoaded", () => {
-            addMemberCard();
-        });
     </script>
 }
